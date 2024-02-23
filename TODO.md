@@ -14,3 +14,14 @@ class Webworker {
 }
 ```
 在start方法中创建worker进程
+
+every class extend WebWorker should have a source field like this:
+```js
+class Cook extends WebWorker {
+    public source = ```
+    some js code
+    ```
+}
+```
+and this source is used to create a worker
+The WebWorker class should also have a start() method, in which we can start a worker using the source

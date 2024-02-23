@@ -1,15 +1,16 @@
-class WebWorker {
-    private worker: Worker | null = null;
-
-    constructor(workerUrl: string) {
-        this.worker = new Worker(workerUrl);
-    }
+abstract class WebWorker {
+    protected abstract source: string;
+    protected worker: Worker | null = null;
 
     start() {
-        // Implement the logic to start the web worker
-    }
+        if (this.worker)
+            return
 
-    // You might want to implement additional methods like stop(), sendMessage(), onMessage(), etc.
+        // initialize worker
+        const blob = new Blob([this.source], { type: 'application/javascript' });
+        const url = URL.createObjectURL(blob);
+        this.worker = new Worker(url);
+    }
 }
 
 export default WebWorker;
