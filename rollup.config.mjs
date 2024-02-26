@@ -2,12 +2,11 @@ import typescript from "@rollup/plugin-typescript";
 
 export default [
     {
-        input: 'src/WebWorker.ts',
+        input: ['src/WebWorker.ts', 'src/ChannelCenter.ts'],
         output: {
-            file: 'dist/WebWorker.js',
+            dir: 'dist',
         },
         plugins: [
-            // nodeResolve(),
             typescript( { target: 'esnext' })
         ],
     },
