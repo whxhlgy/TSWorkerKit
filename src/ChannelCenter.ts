@@ -32,7 +32,7 @@ class ChannelCenter {
         this.channels.get(key)!.add(port);
     }
 
-    // 更新key对应的变量
+    // 更新key对应的变量，发送变量到各个worker
     static update(key: string, value: any) {
         if (!this.channels.has(key)) {
             return
@@ -40,7 +40,7 @@ class ChannelCenter {
         console.log(`update the ${key}`)
         console.log(value)
         for (let port of this.channels.get(key)!) {
-            port.postMessage({ key, value })
+            port.postMessage({ command: 'update', key, value })
         }
     }
 }
