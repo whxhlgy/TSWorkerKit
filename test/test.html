@@ -4,18 +4,6 @@
     <title>WebWorker Test</title>
 </head>
 <body>
-<script type="module">
-    // This script will initialize your WebWorker subclass and post messages to it
-    // Ensure you adjust the paths to point to the correct compiled JS files
-    import {Cook} from "./Cook.js";
-
-    document.addEventListener('DOMContentLoaded', () => {
-        const worker = new Cook(); // Assuming Cook is a subclass of WebWorker
-        worker.start();
-
-        // Example of posting a message to the worker
-        // Consider adding an event listener to receive messages from the worker
-    });
-</script>
+<script type="module" src="./Cook.js"> </script>
 </body>
 </html>

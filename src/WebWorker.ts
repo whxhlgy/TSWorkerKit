@@ -13,13 +13,14 @@ abstract class WebWorker {
         // this snippet enables a port in a worker
         const modifiedSource =
             `
-            let workerPort;
-            self.onmessage = ev => {
-                if (ev.data.command === 'connect') {
-                    workerPort = ev.ports[0];
-                    console.log('connected!');
-                }
-            }; ` + this.source;
+            // let workerPort;
+            // self.onmessage = ev => {
+            //     if (ev.data.command === 'connect') {
+            //         workerPort = ev.ports[0];
+            //         console.log('connected!');
+            //     }
+            // }; 
+            ` + this.source;
 
         // initialize worker
         const blob = new Blob([modifiedSource], { type: 'application/javascript' });
@@ -29,8 +30,7 @@ abstract class WebWorker {
         // register the channel of variable in capturedCVS
         for (let key in this.__captured_cvs) {
             ChannelCenter.register(this.worker, key);
-        }
-
+    }
     }
 }
 
