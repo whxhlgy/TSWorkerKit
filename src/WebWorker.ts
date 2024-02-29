@@ -21,6 +21,23 @@ let onPort = (ev) => {
         console.log(\`receive a update of key: \${ev.data.key}\`);
     }
 }
+let proxyHandler = {
+    get: function(target, propKey, receiver) {
+        if (objectMap.has(target.className)) {
+            return objectMap.get(target.className)[propKey];
+        }
+        console.log(\`cannot find \${target.className} in objectMap\`)
+        return target[propKey];
+    },
+    set: function(target, propKey, newValue, receiver) {
+        target[propKey] = newValue;
+        console.log('set value');
+        if (workerPort) {
+            workerPort.postMessage({ command: 'set', key: target.className, value: { ...target } });
+        }
+        return true;
+    }
+}
 self.onmessage = (event) => {
     let data = event.data
     let command = data.command;
