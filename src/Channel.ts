@@ -38,7 +38,7 @@ class Channel {
         const port = this.channels[name];
         if (port) {
             port.onmessage = (event) => {
-                console.log(`Received message from Channel '${name}':`);
+                console.log(`Received message from Channel '${name}'with command:`+event.data.command);
                 //console.log(event.data);
                 switch (event.data.command) {
                     case 'set':
