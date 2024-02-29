@@ -4,6 +4,8 @@ class ChannelCenter {
     // 此map仅为防止创建重复channel
     private static workerToPort: Map<Worker, MessagePort> = new Map();
 
+    private static values: Map<string,any> = new Map<string, any>();
+
     static register(worker: Worker, key: string) {
         // 每个worker对应的port的一端
         let port: MessagePort | undefined = this.workerToPort.get(worker);
@@ -18,9 +20,16 @@ class ChannelCenter {
 
             // 该port需要能接受set指令，放在if里，防止多次定义
             port.onmessage = ev => {
+
                 switch (ev.data.command) {
                     case "set":
                         this.update(ev.data.key, ev.data.value)
+                        break;
+                    case "get":
+                        var newVal = this.get(ev.data.key);
+                        var port1 = this.workerToPort.get(worker);
+                        port1?.postMessage({command:'got', key:ev.data.key,value:newVal})
+                        break;
                 }
             }
         }
@@ -30,18 +39,27 @@ class ChannelCenter {
             this.channels.set(key, new Set());
         }
         this.channels.get(key)!.add(port);
+
+
     }
 
     // 更新key对应的变量，发送变量到各个worker
-    static update(key: string, value: any) {
-        if (!this.channels.has(key)) {
-            return
-        }
-        console.log(`update the ${key}`)
-        console.log(value)
-        for (let port of this.channels.get(key)!) {
-            port.postMessage({ command: 'update', key, value })
-        }
+    // static update(key: string, value: any) {
+    //     if (!this.channels.has(key)) {
+    //         return
+    //     }
+    //     console.log(`update the ${key}`)
+    //     console.log(value)
+    //
+    //     for (let port of this.channels.get(key)!) {
+    //         port.postMessage({ command: 'update', key, value })
+    //     }
+    // }
+    static update(key: string, value: any){
+        this.values.set(key,value)
+    }
+    static get(key:string){
+        return this.values.get(key);
     }
 }
 

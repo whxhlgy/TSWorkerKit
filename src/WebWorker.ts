@@ -14,9 +14,12 @@ abstract class WebWorker {
 let workerPort;
 let objectMap = new Map();
 let onUpdate = (ev) => {
+    console.log(ev.data.key);
+    console.log(ev.data.key);
     objectMap.set(ev.data.key, ev.data.value);
     console.log(\`receive a update of key: \${ev.data.key}\`);
 }
+
 self.onmessage = (event) => {
     let data = event.data
     let command = data.command;
@@ -45,8 +48,10 @@ self.onmessage = (event) => {
             ChannelCenter.register(this.worker, key);
         }
 
+
         this.worker.postMessage({ command: 'start', source: this.source })
     }
 }
+
 
 export default WebWorker;

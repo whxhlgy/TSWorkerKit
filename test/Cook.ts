@@ -2,6 +2,7 @@ import WebWorker from "../src/WebWorker";
 
 export class Cook extends WebWorker {
 
+
     __captured_cvs = { 'Desk': 'Desk' }
     // Class definition
     source =`
@@ -13,7 +14,17 @@ class __Desk {
 }
 var Desk = new Proxy(__Desk, {
     get: function(target, propKey, receiver) {
-        // TODO
+        if (workerPort) {
+            
+            workerPort.postMessage({ command: 'get', key: target.className});
+            //
+            if(objectMap.has("target"))
+                return (objectMap.get("target"))[propKey];
+            else
+                return target[propKey];
+            
+        }
+        
     },
     set: function(target, propKey, newValue, receiver) {
         target[propKey] = newValue;
@@ -41,7 +52,12 @@ class __Desk {
 }
 var Desk = new Proxy(__Desk, {
     get: function(target, propKey, receiver) {
-        // TODO
+        workerPort.postMessage({ command: 'get', key: target.className});
+            //
+        if(objectMap.has("target"))
+            return (objectMap.get("target"))[propKey];
+        else
+            return target[propKey];
     },
     set: function(target, propKey, newValue, receiver) {
         target[propKey] = newValue;
