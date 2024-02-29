@@ -37,8 +37,8 @@ class ChannelCenter {
         if (!this.channels.has(key)) {
             return
         }
-        console.log(`update the ${key}`)
-        console.log(value)
+        // console.log(`update the ${key}`)
+        // console.log(value)
         for (let port of this.channels.get(key)!) {
             port.postMessage({ command: 'update', key, value })
         }

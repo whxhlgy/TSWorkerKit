@@ -13,7 +13,11 @@ class __Desk {
 }
 var Desk = new Proxy(__Desk, {
     get: function(target, propKey, receiver) {
-        // TODO
+        if (objectMap.has(target.className)) {
+            return objectMap.get(target.className)[propKey];
+        }
+        console.log(\`cannot find \${target.className} in objectMap\`)
+        return target[propKey];
     },
     set: function(target, propKey, newValue, receiver) {
         target[propKey] = newValue;
@@ -41,7 +45,11 @@ class __Desk {
 }
 var Desk = new Proxy(__Desk, {
     get: function(target, propKey, receiver) {
-        // TODO
+        if (objectMap.has(target.className)) {
+            return objectMap.get(target.className)[propKey];
+        }
+        console.log(\`cannot find \${target.className} in objectMap\`)
+        return target[propKey];
     },
     set: function(target, propKey, newValue, receiver) {
         target[propKey] = newValue;
@@ -53,8 +61,9 @@ var Desk = new Proxy(__Desk, {
     }
 });
 console.log('Customer start!');
-while (Desk.food_flag === 0);
-console.log(Desk.food_flag);
+setTimeout(() => {
+    console.log(Desk.food_flag);
+}, 1000)
 `;
 }
 const cooker = new Cook(); // Assuming Cook is a subclass of WebWorker
