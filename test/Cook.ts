@@ -2,7 +2,7 @@ import WebWorker from "../src/WebWorker";
 
 export class Cook extends WebWorker {
 
-    __captured_cvs = { 'Desk': 'Desk' }
+    __captured_cvs = { 'Desk': 'Desk' ,'Desk2': 'Desk2'}
     // Class definition
     source =`
 // Worker thread JavaScript code
