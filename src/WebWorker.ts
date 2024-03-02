@@ -16,8 +16,9 @@ abstract class WebWorker {
         for (let key in this.__captured_cvs) {
             ChannelCenter.register(this.worker, key);
         }
-
-        this.worker.postMessage({ command: 'start', source: this.source })
+        setTimeout(() => {
+            this.worker!.postMessage({ 'command': 'start', 'source': this.source });
+        },2000)
     }
 }
 

@@ -2,7 +2,7 @@ import WebWorker from "../src/WebWorker";
 
 export class Cook extends WebWorker {
 
-    __captured_cvs = { 'Desk': 'Desk' ,'Desk2': 'Desk2'}
+    __captured_cvs = { 'Desk.food_flag': 'Desk.food_flag' ,'Desk.count': 'Desk.count'}
     // Class definition
     source =`
 // Worker thread JavaScript code
@@ -13,12 +13,18 @@ class __Desk {
 }
 var Desk = new Proxy(__Desk, proxyHandler);
 console.log('Cooker start!');
+console.log('Desk.count:', Desk.count);
 Desk.food_flag = 999;
+setTimeout(() => {
+    Desk.count = 20;
+    console.log('Desk.count:', Desk.count);
+}, 1000)
+
 `;
 }
 export class Customer extends WebWorker {
 
-    __captured_cvs = { 'Desk': 'Desk' }
+    __captured_cvs = { 'Desk.food_flag': 'Desk.food_flag' ,'Desk.count': 'Desk.count' }
     // Class definition
     source =`
 // Worker thread JavaScript code
@@ -31,7 +37,7 @@ class __Desk {
 var Desk = new Proxy(__Desk, proxyHandler);
 console.log('Customer start!');
 setTimeout(() => {
-    console.log(Desk.food_flag);
+    console.log('Desk.food_flag:', Desk.food_flag);
 }, 1000)
 `;
 }
