@@ -11,9 +11,9 @@ export default [
         ],
     },
     {
-        input: 'test/Cook.ts',
+        input: 'test/Test1.ts',
         output: {
-            file: 'test/Cook.js'
+            file: 'test/Test1.js'
         },
         plugins: [
             // nodeResolve(),

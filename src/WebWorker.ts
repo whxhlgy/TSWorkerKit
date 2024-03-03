@@ -4,7 +4,7 @@ abstract class WebWorker {
     protected abstract source: string;
     protected abstract __captured_cvs: any;
     protected worker: Worker | null = null;
-
+    private cvsSet: Set<string> = new Set();
     start() {
         if (this.worker)
             return
@@ -14,8 +14,9 @@ abstract class WebWorker {
 
         // register the channel of variable in capturedCVS
         for (let key in this.__captured_cvs) {
-            ChannelCenter.register(this.worker, key);
+            this.cvsSet.add(key);
         }
+        ChannelCenter.register(this.worker, this.cvsSet);
         setTimeout(() => {
             this.worker!.postMessage({ 'command': 'start', 'source': this.source });
         },2000)

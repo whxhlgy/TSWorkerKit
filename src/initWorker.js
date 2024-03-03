@@ -3,16 +3,18 @@
 // 一个简单的worker，当接受到{ command: 'start', source }消息时，会执行source中的代码
 //一个cvs对应一个port集合
 let workerPorts = {};
+let workerPortsToCvs = new Map();
+
 //cvs对应值
 let objectMap = new Map();
-let onPort = (ev) => {
-    let data = ev.data;
-    let command = data.command;
-    if (command === 'update') {
-        objectMap.set(data.key, data.value);
-        console.log(`receive a update of `+data.key+':'+data.value);
-    }
-}
+// let onPort = (ev) => {
+//     let data = ev.data;
+//     let command = data.command;
+//     if (command === 'update') {
+//         objectMap.set(data.key, data.value);
+//         console.log(`receive a update of `+data.key+':'+data.value);
+//     }
+// }
 let proxyHandler = {
     get: function(target, propKey, receiver) {
         //如果在cvs中,并且已经set就返回objectMap的值
@@ -28,26 +30,39 @@ let proxyHandler = {
         target[propKey] = newValue;
         //比如food_flag变成desk.food_flag,因为cvs的是desk.food_flag
         let key= target.className+'.'+propKey;
-        //console.log(key);
-        console.log(workerPorts[key]);
-        //如果在cvs中，就发送消息
-        if(workerPorts[key]!==undefined){
-            //更新objectMap的值
-            objectMap.set(key, newValue);
-            //发送消息给所有的workerPort
-            workerPorts[key].forEach((workerPort) => {
-                workerPort.postMessage({ command: 'update', key: key, value: newValue });
-            });
-            console.log('set value'+key+':'+newValue);
 
+        for(let workerPort of workerPortsToCvs.keys()) {
+
+            let scvs = workerPortsToCvs.get(workerPort);
+            if(scvs.has(key)) {
+                workerPort.postMessage({'command': 'update', 'key': key, 'value': newValue});
+                
+            }
         }
+        // if(cvsToWorkerPorts.has(key)){
+        //     cvsToWorkerPorts.get(key).forEach((workerPort) => {
+        //         workerPort.postMessage({command: 'update', key: key, value: newValue});
+        //     });
+        // }
+        //如果在cvs中，就发送消息
+        // if(workerPorts[key]!==undefined){
+        //     //更新objectMap的值
+        //     objectMap.set(key, newValue);
+        //     //发送消息给所有的workerPort
+        //     workerPorts[key].forEach((workerPort) => {
+        //         workerPort.postMessage({ command: 'update', key: key, value: newValue });
+        //     });
+        //     console.log('set value'+key+':'+newValue);
+        //
+        // }
 
         return true;
     }
 }
 self.onmessage = (event) => {
+
     let data = event.data
-    let key = data.key;
+    let scvs = data.scvs;
     let command = data.command;
     switch (command) {
         case 'start':
@@ -56,16 +71,24 @@ self.onmessage = (event) => {
             break;
         case 'connect':
             let workerPort = event.ports[0];
-            if(!workerPorts[key]) {
-                workerPorts[key] = [];
-                //console.log('create a new workerPort'+key);
-            }
-            //端口加入到workerPorts[key]中
-            workerPorts[key].push(workerPort);
-             console.log(key+' connect');
-             //console.log(workerPorts[key]);
-            workerPort.onmessage = onPort;
+            workerPortsToCvs.set(workerPort, scvs);
+
+            // 设置消息处理函数，你可以将 onPort 放在这里
+            workerPort.onmessage = (ev) => {
+                let data = ev.data;
+                let command = data.command;
+                if (command === 'update') {
+                    objectMap.set(data.key, data.value);
+
+                    console.log(`receive a update of ` + data.key + ':' + data.value);
+                }
+            };
             break;
+            //workerPort.onmessage = onPort;
+
+        // case 'update':
+        //     console.log('update'+data.key+':'+data.value);
+        //     objectMap.set(data.key, data.value);
         default:
             console.log('Received unknown command:', event.data.command);
     }

@@ -4,63 +4,76 @@ class ChannelCenter {
     // 此map仅为防止创建重复channel
     //private static workerToPort: Map<Worker, MessagePort> = new Map();
     //cvs对应的workers
-    private static  cvsToWorkers: Map<string, Set<Worker>> = new Map();
-    static register(worker: Worker, key: string) {
-        // 如果这个cvs对应的worker集合不存在，创建一个
-        if (!this.cvsToWorkers.has(key)) {
-            this.cvsToWorkers.set(key, new Set());
+    private static cvsToWorkers: Map<string, Set<Worker>> = new Map();
+    private static workerTocvs: Map<Worker, Set<string>> = new Map();
+
+
+    static register(worker: Worker, __captured_cvs: Set<string>) {
+        //worker第一次注册
+        if(!this.workerTocvs.has(worker)){
+            this.workerTocvs.set(worker,__captured_cvs);
         }
-        // 将worker放入cvsToWorkers[key]
-        this.cvsToWorkers.get(key)!.add(worker);
-        //worker与Set中所有worker建立channel
-        for (let w of this.cvsToWorkers.get(key)!) {
-            if (w !== worker) {
-                let channel = new MessageChannel();
-                w.postMessage({ 'command': 'connect','key': key}, [ channel.port2 ]);
-                worker.postMessage({ 'command': 'connect','key':key }, [ channel.port1 ]);
-                console.log(`connect ${key} to ${w}`)
+        for(let w of this.workerTocvs.keys()){
+            if(worker!=w){
+                let scvs = this.getscvs(__captured_cvs,this.workerTocvs.get(w)!);
+                if (scvs.size>0) {
+                    let channel = new MessageChannel();
+                    w.postMessage({'command': 'connect',"scvs":scvs}, [channel.port2]);
+                    worker.postMessage({'command': 'connect',"scvs":scvs}, [channel.port1]);
+                    console.log(`connect `)
+                }
+
+
+                // let connectedFlag = false;
+                // let keys = this.workerTocvs.get(worker)!;
+                // let channel;
+                // for(let k of keys){
+                //     if(this.workerTocvs.get(w)!.has(k)){
+                //
+                //         if(connectedFlag==false){
+                //             channel = new MessageChannel();
+                //             connectedFlag = true;
+                //             w.postMessage({'command': 'connected',"worker":worker}, [channel!.port2]);
+                //             worker.postMessage({'command': 'connected',"worker":w}, [channel!.port1]);
+                //         }
+                //         //发送共享变量信息
+                //         w.postMessage({'command': 'sendcvs',"worker":worker,"key":k});
+                //         worker.postMessage({'command': 'sendcvs',"worker":w,"key":k});
+                //     }
+                //
+                //
+                // }
             }
         }
-
-
-        // 每个worker对应的port的一端
-        //let port: MessagePort | undefined = this.workerToPort.get(worker);
-
-        // 如果这个worker是第一次建立隧道，需要进行connect操作
-        // if (port === undefined) {
-        //     let channel = new MessageChannel();
-        //     this.workerToPort.set(worker, channel.port1);
-        //     // 将另一个port传给worker
-        //     worker.postMessage({ 'command': 'connect' }, [ channel.port2 ]);
-        //     port = this.workerToPort.get(worker)!;
-        //
-        //     // 该port需要能接受set指令，放在if里，防止多次定义
-        //     port.onmessage = ev => {
-        //         switch (ev.data.command) {
-        //             case "set":
-        //                 this.update(ev.data.key, ev.data.value)
-        //         }
-        //     }
-        // }
-
-        // 更新channels
-        // if (!this.channels.has(key)) {
-        //     this.channels.set(key, new Set());
-        // }
-        // this.channels.get(key)!.add(port);
+    }
+     static getscvs(cvs1: Set<string>,cvs2: Set<string>){
+        let result = new Set();
+        for(let c of cvs1){
+            if(cvs2.has(c)){
+                result.add(c);
+            }
+        }
+        return result;
     }
 
-    // 更新key对应的变量，发送变量到各个worker
-    // static update(key: string, value: any) {
-    //     if (!this.channels.has(key)) {
-    //         return
+    // static register(worker: Worker, key: string) {
+    //     // 如果这个cvs对应的worker集合不存在，创建一个
+    //     if (!this.cvsToWorkers.has(key)) {
+    //         this.cvsToWorkers.set(key, new Set());
     //     }
-    //     // console.log(`update the ${key}`)
-    //     // console.log(value)
-    //     for (let port of this.channels.get(key)!) {
-    //         port.postMessage({ command: 'update', key, value })
+    //     // 将worker放入cvsToWorkers[key]
+    //     this.cvsToWorkers.get(key)!.add(worker);
+    //     //worker与Set中所有worker建立channel
+    //     for (let w of this.cvsToWorkers.get(key)!) {
+    //         if (w !== worker) {
+    //             let channel = new MessageChannel();
+    //             w.postMessage({'command': 'connect', 'key': key}, [channel.port2]);
+    //             worker.postMessage({'command': 'connect', 'key': key}, [channel.port1]);
+    //             console.log(`connect ${key} to ${w}`)
+    //         }
     //     }
     // }
+
 }
 
 export default ChannelCenter;
